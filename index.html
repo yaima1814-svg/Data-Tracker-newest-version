@@ -800,13 +800,13 @@ nav button.active-nav .nav-icon{color:#aab6ff}
         <div class="dashboard-card">
             <h3>TODAY</h3>
             <div class="dashboard-value" id="dashboardToday">-</div>
-            <p id="dashboardTodayDate">-</p>
+            <p id="dashboardTodayDate">Today's date</p>
         </div>
 
         <div class="dashboard-card">
             <h3>TOMORROW</h3>
             <div class="dashboard-value" id="dashboardNextPerson">-</div>
-            <p id="dashboardNextDate">-</p>
+            <p id="dashboardNextDate">Tomorrow's date</p>
         </div>
 
         <div class="dashboard-card">
@@ -1758,6 +1758,7 @@ Date: __________________
 
 const MINE_PASSWORD = "1014131814";
 const VIEW_PASSWORD = "1814";
+const PARENTAL_PASSWORD = "yaima1814@gmail.com1814";
 
 
 /* ============================================================
@@ -2171,6 +2172,36 @@ async function login() {
         document.getElementById(
             "loginMessage"
         );
+
+
+    if (password === PARENTAL_PASSWORD) {
+
+        editMode = true;
+
+        document.getElementById(
+            "loginScreen"
+        ).style.display = "none";
+
+        document.getElementById(
+            "modeText"
+        ).textContent = "PARENTAL MODE";
+
+        setupEditMode();
+
+        const loaded =
+            await loadSharedAppData();
+
+        if (!loaded) {
+            sharedAppHash = "";
+            await saveSharedAppData();
+        }
+
+        initializePage();
+        startSharedRequestSync();
+        startSharedAppSync();
+
+        return;
+    }
 
 
     if (password === MINE_PASSWORD) {
@@ -2759,17 +2790,16 @@ function renderDashboard() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    function makeDateKey(date) {
+    function dateKey(date) {
         return date.getFullYear() + "-" +
             String(date.getMonth() + 1).padStart(2, "0") + "-" +
             String(date.getDate()).padStart(2, "0");
     }
 
-    const todayValue = makeDateKey(today);
-    const tomorrowValue = makeDateKey(tomorrow);
+    const todayValue = dateKey(today);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowValue = dateKey(tomorrow);
 
     const todayPerson = getScheduledPerson(todayValue);
     const tomorrowPerson = getScheduledPerson(tomorrowValue);
@@ -2780,40 +2810,18 @@ function renderDashboard() {
     const rewardsEl = document.getElementById("dashboardRewards");
     const papersEl = document.getElementById("dashboardPapers");
     const monthsEl = document.getElementById("dashboardMonths");
-    const nextPersonEl = document.getElementById("dashboardNextPerson");
-    const nextDateEl = document.getElementById("dashboardNextDate");
+    const tomorrowPersonEl = document.getElementById("dashboardNextPerson");
+    const tomorrowDateEl = document.getElementById("dashboardNextDate");
 
-    if (todayEl) {
-        todayEl.textContent = todayPerson;
-    }
+    if (todayEl) todayEl.textContent = todayPerson;
+    if (todayDateEl) todayDateEl.textContent = formatToolDate(todayValue);
+    if (tomorrowPersonEl) tomorrowPersonEl.textContent = tomorrowPerson;
+    if (tomorrowDateEl) tomorrowDateEl.textContent = formatToolDate(tomorrowValue);
 
-    if (todayDateEl) {
-        todayDateEl.textContent = formatToolDate(todayValue);
-    }
-
-    if (nextPersonEl) {
-        nextPersonEl.textContent = tomorrowPerson;
-    }
-
-    if (nextDateEl) {
-        nextDateEl.textContent = formatToolDate(tomorrowValue);
-    }
-
-    if (pointsEl) {
-        pointsEl.textContent = angeloPoints + " POINTS";
-    }
-
-    if (rewardsEl) {
-        rewardsEl.textContent = rewardHistory.length;
-    }
-
-    if (papersEl) {
-        papersEl.textContent = savedPapers.length;
-    }
-
-    if (monthsEl) {
-        monthsEl.textContent = savedMonths.length;
-    }
+    if (pointsEl) pointsEl.textContent = angeloPoints + " POINTS";
+    if (rewardsEl) rewardsEl.textContent = rewardHistory.length;
+    if (papersEl) papersEl.textContent = savedPapers.length;
+    if (monthsEl) monthsEl.textContent = savedMonths.length;
 }
 
 function updateSettings() {
